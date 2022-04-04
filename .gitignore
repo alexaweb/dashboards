@@ -1,0 +1,6 @@
+#DIRECTORIES TO IGNORE
+config/*
+old/*
+
+#FILENAMES TO IGNORE
+client*
