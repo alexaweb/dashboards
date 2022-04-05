@@ -53,6 +53,8 @@ def import_sp2gas(db,sp,ws,sheetname,rowlog):
 	#end logging
 	log_end(ws,rowlog)
 
+
+#BEGIN
 print(datetime.now(),': CSB Chile DASHBOARD')
 mydb = pymssql.connect(DB.dbhost,DB.dbuser,DB.dbpassword,DB.dbname)
 
