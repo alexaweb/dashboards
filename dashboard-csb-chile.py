@@ -68,14 +68,19 @@ sql_rem = "SELECT cwmovim.DgaCod as 'dgacod', cwcpbte.CpbMes as 'mes', cwcpbte.C
 sql_gastosdetallecodigo = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS', cwmovim.dgacod,cwtdetg.DesDet as 'descripciondetalle', cwmovim.MovGlosa as 'glosa', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc', cwpctas.pccodi as 'codigo', cwpctas.pcdesc as 'descripcion' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg, softland.cwpctas where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.CcCod = cwtccos.CodiCC and cwpctas.pccodi= cwmovim.pctcod and cwmovim.cpbano > 2016"
 sql_gastosdetalle = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS', cwmovim.dgacod,cwtdetg.DesDet as 'descripciondetalle', cwmovim.MovGlosa as 'glosa', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.CcCod = cwtccos.CodiCC"
 
+sql_ctasctes = "SELECT cwpctas.PCCODI, cwpctas.PCDESC, cwcpbte.CpbNum, cwcpbte.CpbTip, cwcpbte.CpbNui, cwmovim.CodAux, cwmovim.TtdCod, cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', Sum(cwmovim.MovDebe-cwmovim.MovHaber) AS 'SALDO', cwmovim.MovGlosa FROM softland.cwcpbte, softland.cwmovim, softland.cwpctas WHERE cwmovim.CpbAno = cwcpbte.CpbAno AND cwmovim.CpbNum = cwcpbte.CpbNum AND cwmovim.AreaCod = cwcpbte.AreaCod AND cwmovim.PctCod = cwpctas.PCCODI AND cwcpbte.CpbEst='V' and cwcpbte.CpbMes<>'00' GROUP BY cwpctas.PCCODI, cwpctas.PCDESC, cwcpbte.CpbNum, cwcpbte.CpbTip, cwcpbte.CpbNui, cwmovim.CodAux, cwmovim.TtdCod, cwmovim.CpbMes, cwmovim.CpbAno, cwmovim.MovGlosa HAVING ((cwpctas.PCCODI='1-1-10-002') or (cwpctas.PCCODI='1-1-10-005') or (cwpctas.PCCODI='1-1-10-006') or (cwpctas.PCCODI='1-1-10-007') or (cwpctas.PCCODI='1-1-10-008') or (cwpctas.PCCODI='1-1-10-009') or (cwpctas.PCCODI='1-1-10-010') or (cwpctas.PCCODI='1-1-10-011') or (cwpctas.PCCODI='5-3-01-009') or (cwpctas.PCCODI='5-3-01-010')) ";
+
 # Find a workbook by name and open the first sheet
 # Make sure you use the right name here.
 ws = client.open_by_key(DB.file_id)
 
 #EXECUTE SQL SERVER QUERIES
 import_sqlserver2gas(mydb,sql_rem,ws,"qREM",10)
+print(datetime.now(),': CSB Chile DASHBOARD: REM')
 import_sqlserver2gas(mydb,sql_gastosdetalle,ws,"qGASTOSDETALLE",11)
-
+print(datetime.now(),': CSB Chile DASHBOARD: GASTOS DETALLE')
+import_sqlserver2gas(mydb,sql_ctasctes,ws,"qCTASCTES",12)
+print(datetime.now(),': CSB Chile DASHBOARD: CTAS CTES')
 
 mydb.close()
 
