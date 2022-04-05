@@ -72,6 +72,7 @@ sql_gastosdetalle = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cw
 # Make sure you use the right name here.
 ws = client.open_by_key(DB.file_id)
 
+#EXECUTE SQL SERVER QUERIES
 import_sqlserver2gas(mydb,sql_rem,ws,"qREM",10)
 import_sqlserver2gas(mydb,sql_gastosdetalle,ws,"qGASTOSDETALLE",11)
 
