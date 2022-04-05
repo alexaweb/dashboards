@@ -56,8 +56,8 @@ def import_sp2gas(db,sp,ws,sheetname,rowlog):
 	log_end(ws,rowlog)
 
 #driver = '{ODBC Driver 17 for SQL Server}'
-driver = '{ODBC Driver 17 for SQL Server}'
-sql_connection_string = 'DRIVER='+driver+';SERVER='+DB.dbhost+';DATABASE='+DB.dbname+';UID='+DB.dbuser+';PWD='+DB.dbpassword
+#driver = '{ODBC Driver 17 for SQL Server}'
+#sql_connection_string = 'DRIVER='+driver+';SERVER='+DB.dbhost+';DATABASE='+DB.dbname+';UID='+DB.dbuser+';PWD='+DB.dbpassword
 print(datetime.now(),': CSB Chile DASHBOARD')
 #print(sql_connection_string)
 mydb = pymssql.connect(DB.dbhost,DB.dbuser,DB.dbpassword,DB.dbname)
