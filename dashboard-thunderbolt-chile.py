@@ -9,6 +9,8 @@ from datetime import datetime
 import pandas as pd
 
 import config.thunderboltDB as DB
+import config.conacsaDB as DBconacsa
+import config.indeproipDB as DBindeproip
 import config.common as interpetrol
 
 def log_begin(wbook,rownum):
@@ -77,11 +79,11 @@ sql_ctasctes = "SELECT cwpctas.PCCODI, cwpctas.PCDESC, cwcpbte.CpbNum, cwcpbte.C
 ws = client.open_by_key(DB.file_id)
 
 #EXECUTE SQL SERVER QUERIES
-import_sqlserver2gas(mydb,sql_docsemitidos,ws,"qDOCS_EMITIDOS",7)
+import_sqlserver2gas(mydb,sql_docsemitidos,ws,"qDOCUMENTOS_EMITIDOS",7)
 print(datetime.now(),': Thunderbolt Chile DASHBOARD: DOCS EMITIDOS')
 import_sqlserver2gas(mydb,sql_cxcextranjeros,ws,"qCXC_EXTRANJEROS",8)
 print(datetime.now(),': Thunderbolt Chile DASHBOARD: CxC EXTRANJEROS')
-import_sqlserver2gas(mydb,sql_rem,ws,"qREM",9)
+import_sqlserver2gas(mydb,sql_rem,ws,"qREMUNERACIONES_RESUMEN",9)
 print(datetime.now(),': Thunderbolt Chile DASHBOARD: REMUNERACIONES RESUMEN')
 import_sqlserver2gas(mydb,sql_excentosresumen,ws,"qEXCENTOS_RESUMEN",10)
 print(datetime.now(),': Thunderbolt Chile DASHBOARD: EXCENTOS RESUMEN')
@@ -91,6 +93,30 @@ import_sqlserver2gas(mydb,sql_ctasctes,ws,"qCTASCTES",12)
 print(datetime.now(),': Thunderbolt Chile DASHBOARD: CTAS CTES')
 
 mydb.close()
+mydb = pymssql.connect(DB.dbhost,DB.dbuser,DB.dbpassword,DBconacsa.dbname)
+sql_afectosresumenconacsa = "SELECT g.mes as 'mes', g.ano as 'ano', isnull(sum(g.GASTOS),0) as 'gastos_afectos', isnull(sum(f.NETO_CC_Barco),0) as 'facturado_neto', isnull(sum(g.GASTOS),0) + isnull(sum(f.NETO_CC_Barco),0) as 'gastos_por_facturar', g.vessel as 'vessel', g.cc as 'cc' from (select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', sum(cwmovim.MovDebe-cwmovim.MovHaber) AS 'GASTOS', ltrim(right(rtrim(cwtccos.DescCC),7)) as 'vessel', cwmovim.CcCod as 'cc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwcpbte.CpbEst='V' AND cwmovim.CcCod = cwtccos.CodiCC AND (cwmovim.PctCod='5-2-03-005') and (cwmovim.CcCod='03-40')  group by  cwmovim.CpbMes, cwmovim.CpbAno,  cwtccos.DescCC, cwmovim.CcCod) as g full outer JOIN (select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', ltrim(right(rtrim(cwtccos.DescCC),7)) as 'vessel', sum(cwmovim.MovDebe-cwmovim.MovHaber) AS 'NETO_CC_Barco', cwmovim.CcCod as 'cc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwcpbte.CpbEst='V' AND cwmovim.CcCod = cwtccos.CodiCC AND cwmovim.PctCod='4-1-03-003' and (cwmovim.CcCod='03-40')  group by  cwmovim.CpbMes, cwmovim.CpbAno,  cwtccos.DescCC,cwmovim.CcCod) as f on f.ano=g.ano and f.mes=g.mes and f.vessel = g.vessel and f.cc = g.cc group by g.ano, g.mes, g.vessel, g.cc order by g.ano, g.mes"
+sql_docsemitidosconacsa = "select year(cwmovim.movfe) as 'ano', month(cwmovim.movfe) as 'mes', 'ALLENDALE' as 'vessel', cwttdoc.CodDoc, cwmovim.numdoc, cwmovim.codaux, cwtauxi.nomaux, cwmovim.movfe, cwmovim.cpbmes, cwmovim.cpbano, cwmovim.movdebe- cwmovim.movhaber as MONTO_FACTURADO, cwmovim.movglosa, cwttdoc.desdoc from softland.cwcpbte, softland.cwmovim, softland.cwtauxi, softland.cwttdoc where cwmovim.ttdcod = cwttdoc.coddoc and cwtauxi.codaux=cwmovim.codaux and cwmovim.cpbmes<>'00' AND cwcpbte.CpbEst='V' and cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum and cwmovim.codaux = '59180540'  order by movfe desc"
+sql_cxcextranjerosconacsa = "SELECT cwmovim.CcCod, cwmovim.DgaCod, cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovFe, cwmovim.CpbNum, cwmovim.PctCod, cwmovim.codaux, cwmovim.MovGlosa, cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS' FROM softland.cwmovim, softland.cwcpbte where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwcpbte.CpbEst='V' and cwmovim.PctCod='1-1-04-002' and cwmovim.codaux in ('59180540') and cwmovim.cpbmes <>0 order by cwmovim.MovFe desc"
 
+import_sqlserver2gas(mydb,sql_docsemitidosconacsa,ws,"qDOCUMENTOS_EMITIDOS_CONACSA",14)
+print(datetime.now(),': Thunderbolt Chile DASHBOARD: DOCS EMITIDOS CONACSA')
+import_sqlserver2gas(mydb,sql_cxcextranjerosconacsa,ws,"qCXC_EXTRANJEROS_CONACSA",15)
+print(datetime.now(),': Thunderbolt Chile DASHBOARD: CxC EXTRANJEROS CONACSA')
+import_sqlserver2gas(mydb,sql_afectosresumenconacsa,ws,"qAFECTOS_RESUMEN_CONACSA",16)
+print(datetime.now(),': Thunderbolt Chile DASHBOARD: AFECTOS CONACSA')
+mydb.close()
+
+mydb = pymssql.connect(DB.dbhost,DB.dbuser,DB.dbpassword,DBindeproip.dbname)
+sql_afectosresumenindeproip = "SELECT g.mes as 'mes', g.ano as 'ano', isnull(sum(g.GASTOS),0) as 'gastos_afectos', isnull(sum(f.NETO_CC_Barco),0) as 'facturado_neto', isnull(sum(g.GASTOS),0) + isnull(sum(f.NETO_CC_Barco),0) as 'gastos_por_facturar', g.vessel as 'vessel', g.cc as 'cc' from (select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', sum(cwmovim.MovDebe-cwmovim.MovHaber) AS 'GASTOS', ltrim(right(rtrim(cwtccos.DescCC),7)) as 'vessel', cwmovim.CcCod as 'cc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwcpbte.CpbEst='V' AND cwmovim.CcCod = cwtccos.CodiCC AND (cwmovim.PctCod='5-2-01-002') and (cwmovim.CcCod='03-40')  group by  cwmovim.CpbMes, cwmovim.CpbAno,  cwtccos.DescCC, cwmovim.CcCod) as g full outer JOIN (select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', ltrim(right(rtrim(cwtccos.DescCC),7)) as 'vessel', sum(cwmovim.MovDebe-cwmovim.MovHaber) AS 'NETO_CC_Barco', cwmovim.CcCod as 'cc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwcpbte.CpbEst='V' AND cwmovim.CcCod = cwtccos.CodiCC AND cwmovim.PctCod='4-1-03-003' and (cwmovim.CcCod='03-40')  group by  cwmovim.CpbMes, cwmovim.CpbAno,  cwtccos.DescCC,cwmovim.CcCod) as f on f.ano=g.ano and f.mes=g.mes and f.vessel = g.vessel and f.cc = g.cc group by g.ano, g.mes, g.vessel, g.cc order by g.ano, g.mes"
+sql_docsemitidosindeproip = "select year(cwmovim.movfe) as 'ano', month(cwmovim.movfe) as 'mes', 'ALLENDALE' as 'vessel', cwttdoc.CodDoc, cwmovim.numdoc, cwmovim.codaux, cwtauxi.nomaux, cwmovim.movfe, cwmovim.cpbmes, cwmovim.cpbano, cwmovim.movdebe- cwmovim.movhaber as MONTO_FACTURADO, cwmovim.movglosa, cwttdoc.desdoc from softland.cwcpbte, softland.cwmovim, softland.cwtauxi, softland.cwttdoc where cwmovim.ttdcod = cwttdoc.coddoc and cwtauxi.codaux=cwmovim.codaux and cwmovim.cpbmes<>'00' AND cwcpbte.CpbEst='V' and cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum and cwmovim.codaux = '59180540'  order by movfe desc"
+sql_cxcextranjerosindeproip = "SELECT cwmovim.CcCod, cwmovim.DgaCod, cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovFe, cwmovim.CpbNum, cwmovim.PctCod, cwmovim.codaux, cwmovim.MovGlosa, cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS' FROM softland.cwmovim, softland.cwcpbte where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwcpbte.CpbEst='V' and cwmovim.PctCod='1-1-04-002' and cwmovim.codaux in ('59180540') and cwmovim.cpbmes <>0 order by cwmovim.MovFe desc"
+
+import_sqlserver2gas(mydb,sql_docsemitidos,ws,"qDOCUMENTOS_EMITIDOS_INDEPROIP",17)
+print(datetime.now(),': Thunderbolt Chile DASHBOARD: DOCS EMITIDOS INDEPROIP')
+import_sqlserver2gas(mydb,sql_cxcextranjeros,ws,"qCXC_EXTRANJEROS_INDEPROIP",18)
+print(datetime.now(),': Thunderbolt Chile DASHBOARD: CXC EXTRANJEROS INDEPROIP')
+import_sqlserver2gas(mydb,sql_afectosresumenconacsa,ws,"qAFECTOS_RESUMEN_INDEPROIP",19)
+print(datetime.now(),': Thunderbolt Chile DASHBOARD: AFECTOS INDEPROIP')
+mydb.close()
 
 exit()
