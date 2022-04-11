@@ -29,7 +29,7 @@ def import_sqlserver2gas(db,sqlstmt,ws,sheetname,rowlog):
 	sh=ws.worksheet(sheetname)
 	sh.clear()
 	set_with_dataframe(sh,sql_data)
-	cursor.close()	
+	cursor.close()
 	#end logging
 	log_end(ws,rowlog)
 
@@ -54,6 +54,7 @@ sql_ventas = "SELECT iw_gsaen.Tipo, iw_gsaen.Folio, (iw_gsaen.NetoAfecto + iw_gs
 sql_saldos = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', sum(cwmovim.MovDebe-cwmovim.MovHaber) AS 'GASTOS', cwmovim.pctcod as 'codigo' FROM softland.cwcpbte, softland.cwmovim where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum and cwmovim.CpbMes <> '00' AND cwcpbte.CpbEst='V' group by cwmovim.pctcod, cwmovim.CpbMes, cwmovim.CpbAno"
 sql_enel = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS', cwmovim.dgacod, cwtdetg.DesDet as 'descripciondetalle', cwmovim.MovGlosa as 'glosa', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.CcCod = cwtccos.CodiCC and cwmovim.cccod = '03-32'"
 sql_enap = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS', cwmovim.dgacod, cwtdetg.DesDet as 'descripciondetalle', cwmovim.MovGlosa as 'glosa', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.CcCod = cwtccos.CodiCC and cwmovim.cccod = '03-50'"
+sql_conacsa = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS', cwmovim.dgacod, cwtdetg.DesDet as 'descripciondetalle', cwmovim.MovGlosa as 'glosa', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.CcCod = cwtccos.CodiCC and cwmovim.cccod = '03-45'"
 
 # Find a workbook by name and open the first sheet
 # Make sure you use the right name here.
@@ -66,6 +67,7 @@ import_sqlserver2gas(mydb,sql_ingresos,ws,"qINGRESOS",13)
 import_sqlserver2gas(mydb,sql_ventas,ws,"qVENTAS",14)
 import_sqlserver2gas(mydb,sql_saldos,ws,"qSALDOS",15)
 import_sqlserver2gas(mydb,sql_enel,ws,"qENEL",16)
+import_sqlserver2gas(mydb,sql_conacsa,ws,"qCONACSA",17)
 
 
 mydb.close()
