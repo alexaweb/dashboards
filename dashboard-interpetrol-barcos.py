@@ -55,7 +55,7 @@ def import_sp2gas(db,sp,ws,sheetname,rowlog):
 
 
 #BEGIN
-print(datetime.now(),': INTERPETROL CSB Chile DASHBOARD')
+print(datetime.now(),': INTERPETROL BARCOS Chile DASHBOARD')
 mydb = pymssql.connect(DB.dbhost,DB.dbuser,DB.dbpassword,DB.dbname)
 
 
