@@ -78,6 +78,7 @@ print("Extran registros a contar de: ",fecha_corte)
 with SSHTunnelForwarder(
 	(csbDB.sshhost, 22), #Remote server IP and SSH port
 	ssh_username = csbDB.sshuser,
+	print('aw:',sshkeys.AWS)
 	#ssh_password = "<password>",
 	ssh_private_key = sshkeys.AWS,
 	remote_bind_address=(sshkeys.AWS_local_ip, sshkeys.AWS_local_port)) as server: #PostgreSQL server IP and sever port on remote machine
@@ -85,9 +86,9 @@ with SSHTunnelForwarder(
 	try:
 		server.start() #start ssh sever
 	except Error as e:
-		print("No pude conectar a AWS: ",e)
+		print(datetime.now(),' No pude conectar a AWS: '',e)
 		exit()
-	print('Server connected via SSH')
+	print(datetime.now(),' Replicate CSB: Server connected via SSH')
 
 	params = {
 		'database': csbDB.pgdbname,
@@ -100,10 +101,10 @@ with SSHTunnelForwarder(
 	try:
 		conn = psycopg2.connect(**params)
 	except Error as e:
-		print("No pude conectar a pgSQL: ",e)
+		print(datetime.now(),' No pude conectar a pgSQL: '',e)
 		exit()
 	curs = conn.cursor()
-	print("pgSQL database connected\n")
+	print(datetime.now(),' pgSQL database connected\n')
 
 
 	sql_statement1 = "select * from account_account where write_date > '"+str(fecha_corte)+"';"
