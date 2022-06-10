@@ -16,6 +16,7 @@ import time
 import re
 import warnings
 
+
 # Ignores only DeprecationWarningS (not recommended)
 warnings.filterwarnings(action='ignore',module='.*paramiko.*')
 
@@ -24,7 +25,7 @@ from sshtunnel import SSHTunnelForwarder #Run pip install sshtunnel
 
 
 
-
+import config.sshconfig as sshkeys
 import config.csbDB as csbDB
 
 f= '%Y-%m-%d %H:%M:%S'
@@ -78,9 +79,9 @@ with SSHTunnelForwarder(
 	(csbDB.sshhost, 22), #Remote server IP and SSH port
 	ssh_username = csbDB.sshuser,
 	#ssh_password = "<password>",
-	ssh_private_key = "/home/acelle/aws-act.pem",
-	remote_bind_address=('127.0.0.1', 5432)) as server: #PostgreSQL server IP and sever port on remote machine
-	
+	ssh_private_key = sshkeys.AWS,
+	remote_bind_address=(AWS_local_ip, AWS_local_port)) as server: #PostgreSQL server IP and sever port on remote machine
+
 	try:
 		server.start() #start ssh sever
 	except Error as e:
@@ -128,7 +129,7 @@ with SSHTunnelForwarder(
 	except Error as e:
 		print("Error obteniendo pgSQL: ",e)
 		exit()
-		
+
 
 #	print(data7)
 	data1 = data1.replace({np.NaN: None})
@@ -270,5 +271,3 @@ with SSHTunnelForwarder(
 print("... ending ...")
 
 exit()
-
-
