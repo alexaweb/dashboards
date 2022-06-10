@@ -78,11 +78,10 @@ print("Extran registros a contar de: ",fecha_corte)
 with SSHTunnelForwarder(
 	(csbDB.sshhost, 22), #Remote server IP and SSH port
 	ssh_username = csbDB.sshuser,
-	print('aw:',sshkeys.AWS)
 	#ssh_password = "<password>",
 	ssh_private_key = sshkeys.AWS,
 	remote_bind_address=(sshkeys.AWS_local_ip, sshkeys.AWS_local_port)) as server: #PostgreSQL server IP and sever port on remote machine
-
+	print('aw:',sshkeys.AWS)
 	try:
 		server.start() #start ssh sever
 	except Error as e:
