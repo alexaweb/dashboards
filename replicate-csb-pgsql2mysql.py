@@ -80,7 +80,7 @@ with SSHTunnelForwarder(
 	ssh_username = csbDB.sshuser,
 	#ssh_password = "<password>",
 	ssh_private_key = sshkeys.AWS,
-	remote_bind_address=(AWS_local_ip, AWS_local_port)) as server: #PostgreSQL server IP and sever port on remote machine
+	remote_bind_address=(sshkeys.AWS_local_ip, sshkeys.AWS_local_port)) as server: #PostgreSQL server IP and sever port on remote machine
 
 	try:
 		server.start() #start ssh sever
