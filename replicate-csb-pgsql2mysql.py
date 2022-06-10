@@ -85,7 +85,7 @@ with SSHTunnelForwarder(
 	try:
 		server.start() #start ssh sever
 	except Error as e:
-		print(datetime.now(),' No pude conectar a AWS: '',e)
+		print(datetime.now(),' No pude conectar a AWS: ',e)
 		exit()
 	print(datetime.now(),' Replicate CSB: Server connected via SSH')
 
@@ -100,7 +100,7 @@ with SSHTunnelForwarder(
 	try:
 		conn = psycopg2.connect(**params)
 	except Error as e:
-		print(datetime.now(),' No pude conectar a pgSQL: '',e)
+		print(datetime.now(),' No pude conectar a pgSQL: ',e)
 		exit()
 	curs = conn.cursor()
 	print(datetime.now(),' pgSQL database connected\n')
