@@ -8,7 +8,7 @@ from pandas import DataFrame
 from datetime import datetime
 import pandas as pd
 
-import config.ipmtDB as DB
+import config.ipmtDBstandalone as DB
 import config.common as interpetrol
 
 def log_begin(wbook,rownum):
