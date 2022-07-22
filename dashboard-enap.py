@@ -8,11 +8,13 @@ from gspread_dataframe import get_as_dataframe, set_with_dataframe
 from pandas import DataFrame
 from datetime import datetime
 import pandas as pd
+import pymssql
 
 import config.indeproipDB as indeproipDB
 import config.interpetrolDB as interpetrolDB
 import config.conacsaDB as conacsaDB
 import config.ipmtDB as ipmtDB
+import config.common as interpetrol
 
 def log_begin(wbook,rownum):
 	begincolumn=5
@@ -36,17 +38,23 @@ def import_sqlserver2gas(db,sqlstmt,ws,sheetname,rowlog):
 	#end logging
 	log_end(ws,rowlog)
 
-driver = '{ODBC Driver 17 for SQL Server}'
-sql_connection_string = 'DRIVER='+driver+';SERVER='+indeproipDB.dbhost+';DATABASE='+indeproipDB.dbname+';UID='+indeproipDB.dbuser+';PWD='+indeproipDB.dbpassword
-print(datetime.now(),': ENAP DASHBOARD')
-mydb = pyodbc.connect(sql_connection_string)
 
+
+driver = '{ODBC Driver 17 for SQL Server}'
+#sql_connection_string = 'DRIVER='+driver+';SERVER='+indeproipDB.dbhost+';DATABASE='+indeproipDB.dbname+';UID='+indeproipDB.dbuser+';PWD='+indeproipDB.dbpassword
+print(datetime.now(),': ENAP DASHBOARD')
+#mydb = pyodbc.connect(sql_connection_string)
+mydb = pymssql.connect(indeproipDB.dbhost,indeproipDB.dbuser,indeproipDB.dbpassword,indeproipDB.dbname)
 
 # use creds to create a client to interact with the Google Drive API
-scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('/home/acelle/apps/cobs/client_secret_interpetrol.json', scope)
+#scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+#creds = ServiceAccountCredentials.from_json_keyfile_name('/home/acelle/apps/cobs/client_secret_interpetrol.json', scope)
+#client = gspread.authorize(creds)
+#file_id_enap = '16-4A0al78YgloNqVxki8s1aqefv5u6RMtYBwbDb_9tw'
+creds = ServiceAccountCredentials.from_json_keyfile_name(interpetrol.jsoninterpetrol, interpetrol.scope)
 client = gspread.authorize(creds)
-file_id = '16-4A0al78YgloNqVxki8s1aqefv5u6RMtYBwbDb_9tw'
+ws = client.open_by_key(ipmtDB.file_id_enap)
+
 
 sql_ingresos = "SELECT cwmovim.DgaCod as 'dgacod', cwcpbte.CpbMes as 'mes', cwcpbte.CpbAno as 'ano', cwcpbte.CpbNum as 'cpbnum', cwcpbte.CpbTip as 'cpbtip', cwcpbte.CpbNui as 'cpbnui', cwmovim.PctCod as 'pctcod', cwmovim.MovGlosa as 'glosa', -cwmovim.MovDebe+cwmovim.MovHaber AS 'SALDO', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descipcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg WHERE cwmovim.CpbAno = cwcpbte.CpbAno AND cwmovim.CpbNum = cwcpbte.CpbNum AND cwmovim.AreaCod = cwcpbte.AreaCod AND cwmovim.CcCod = cwtccos.CodiCC AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.PctCod like '4%' AND (cwcpbte.CpbEst='V') and cwmovim.CcCod = '03-50'"
 sql_rem = "SELECT cwmovim.DgaCod as 'dgacod', cwcpbte.CpbMes as 'mes', cwcpbte.CpbAno as 'ano', cwcpbte.CpbNum as 'cpbnum', cwcpbte.CpbTip as 'cpbtip', cwcpbte.CpbNui as 'cpbnui', cwmovim.PctCod as 'pctcod', cwmovim.MovGlosa as 'glosa', cwmovim.MovDebe-cwmovim.MovHaber AS 'SALDO', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg WHERE cwmovim.CpbAno = cwcpbte.CpbAno AND cwmovim.CpbNum = cwcpbte.CpbNum AND cwmovim.AreaCod = cwcpbte.AreaCod AND cwmovim.CcCod = cwtccos.CodiCC AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.DgaCod like '03%' AND (cwcpbte.CpbEst='V') and cwmovim.CcCod = '03-50'"
@@ -55,7 +63,7 @@ sql_gastosdetallecodigo = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'an
 
 # Find a workbook by name and open the first sheet
 # Make sure you use the right name here.
-ws = client.open_by_key(file_id)
+
 
 import_sqlserver2gas(mydb,sql_ingresos,ws,"qINGRESOS",10)
 import_sqlserver2gas(mydb,sql_rem,ws,"qREM",11)
@@ -68,8 +76,9 @@ import_sqlserver2gas(mydb,sql_gastosdetallecodigo,ws,"qGASTOSdetalleCODIGO",12)
 mydb.close()
 
 ## INFO INTERPETROL
-sql_connection_string = 'DRIVER='+driver+';SERVER='+interpetrolDB.dbhost+';DATABASE='+interpetrolDB.dbname+';UID='+interpetrolDB.dbuser+';PWD='+interpetrolDB.dbpassword
-mydb = pyodbc.connect(sql_connection_string)
+#sql_connection_string = 'DRIVER='+driver+';SERVER='+interpetrolDB.dbhost+';DATABASE='+interpetrolDB.dbname+';UID='+interpetrolDB.dbuser+';PWD='+interpetrolDB.dbpassword
+#mydb = pyodbc.connect(sql_connection_string)
+mydb = pymssql.connect(interpetrolDB.dbhost,interpetrolDB.dbuser,interpetrolDB.dbpassword,interpetrolDB.dbname)
 sql_rem = "SELECT cwmovim.DgaCod as 'dgacod', cwcpbte.CpbMes as 'mes', cwcpbte.CpbAno as 'ano', cwcpbte.CpbNum as 'cpbnum', cwcpbte.CpbTip as 'cpbtip', cwcpbte.CpbNui as 'cpbnui', cwmovim.PctCod as 'pctcod', cwmovim.MovGlosa as 'glosa', cwmovim.MovDebe-cwmovim.MovHaber AS 'SALDO', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg WHERE cwmovim.CpbAno = cwcpbte.CpbAno AND cwmovim.CpbNum = cwcpbte.CpbNum AND cwmovim.AreaCod = cwcpbte.AreaCod AND cwmovim.CcCod = cwtccos.CodiCC AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.dgacod like '03%' AND (cwcpbte.CpbEst='V') and cwmovim.CcCod = '03-50'"
 sql_gastosdetallecodigo = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS', cwmovim.dgacod,cwtdetg.DesDet as 'descripciondetalle', cwmovim.MovGlosa as 'glosa', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc', cwpctas.pccodi as 'codigo', cwpctas.pcdesc as 'descripcion' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg, softland.cwpctas where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.CcCod = cwtccos.CodiCC and cwpctas.pccodi= cwmovim.pctcod and cwmovim.cpbano > 2019 and cwmovim.CcCod = '03-50' and cwmovim.DgaCod not like '03%'"
 import_sqlserver2gas(mydb,sql_rem,ws,"qREM-IP",14)
@@ -77,8 +86,9 @@ import_sqlserver2gas(mydb,sql_gastosdetallecodigo,ws,"qGASTOSdetalleCODIGO-IP",1
 mydb.close()
 
 # INFO IPMT
-sql_connection_string = 'DRIVER='+driver+';SERVER='+ipmtDB.dbhost+';DATABASE='+ipmtDB.dbname+';UID='+ipmtDB.dbuser+';PWD='+ipmtDB.dbpassword
-mydb = pyodbc.connect(sql_connection_string)
+#sql_connection_string = 'DRIVER='+driver+';SERVER='+ipmtDB.dbhost+';DATABASE='+ipmtDB.dbname+';UID='+ipmtDB.dbuser+';PWD='+ipmtDB.dbpassword
+#mydb = pyodbc.connect(sql_connection_string)
+mydb = pymssql.connect(ipmtDB.dbhost,ipmtDB.dbuser,ipmtDB.dbpassword,ipmtDB.dbname)
 import_sqlserver2gas(mydb,sql_ingresos,ws,"qINGRESOS-IPMT",18)
 import_sqlserver2gas(mydb,sql_rem,ws,"qREM-IPMT",19)
 import_sqlserver2gas(mydb,sql_gastosdetallecodigo,ws,"qGASTOSdetalleCODIGO-IPMT",20)
@@ -86,8 +96,9 @@ mydb.close()
 
 
 #  INFO CONACSA
-sql_connection_string = 'DRIVER='+driver+';SERVER='+conacsaDB.dbhost+';DATABASE='+conacsaDB.dbname+';UID='+conacsaDB.dbuser+';PWD='+conacsaDB.dbpassword
-mydb = pyodbc.connect(sql_connection_string)
+#sql_connection_string = 'DRIVER='+driver+';SERVER='+conacsaDB.dbhost+';DATABASE='+conacsaDB.dbname+';UID='+conacsaDB.dbuser+';PWD='+conacsaDB.dbpassword
+#mydb = pyodbc.connect(sql_connection_string)
+mydb = pymssql.connect(conacsaDB.dbhost,conacsaDB.dbuser,conacsaDB.dbpassword,conacsaDB.dbname)
 sql_gastosdetallecodigo = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'ano', cwmovim.MovDebe-cwmovim.MovHaber AS 'GASTOS', cwmovim.dgacod,cwtdetg.DesDet as 'descripciondetalle', cwmovim.MovGlosa as 'glosa', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc', cwpctas.pccodi as 'codigo', cwpctas.pcdesc as 'descripcion' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg, softland.cwpctas where cwcpbte.AreaCod = cwmovim.AreaCod AND cwcpbte.CpbAno = cwmovim.CpbAno AND cwcpbte.CpbNum = cwmovim.CpbNum AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.CcCod = cwtccos.CodiCC and cwpctas.pccodi= cwmovim.pctcod and cwmovim.cpbano > 2019 and cwmovim.CcCod = '03-50'"
 import_sqlserver2gas(mydb,sql_gastosdetallecodigo,ws,"qGASTOSdetalleCODIGO-CONACSA",16)
 mydb.close()
