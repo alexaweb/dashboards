@@ -44,7 +44,6 @@ driver = '{ODBC Driver 17 for SQL Server}'
 #sql_connection_string = 'DRIVER='+driver+';SERVER='+indeproipDB.dbhost+';DATABASE='+indeproipDB.dbname+';UID='+indeproipDB.dbuser+';PWD='+indeproipDB.dbpassword
 print(datetime.now(),': ENAP DASHBOARD')
 #mydb = pyodbc.connect(sql_connection_string)
-mydb = pymssql.connect(indeproipDB.dbhost,indeproipDB.dbuser,indeproipDB.dbpassword,indeproipDB.dbname)
 
 # use creds to create a client to interact with the Google Drive API
 #scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
@@ -55,7 +54,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name(interpetrol.jsoninterpe
 client = gspread.authorize(creds)
 ws = client.open_by_key(ipmtDB.file_id_enap)
 
-
+mydb = pymssql.connect(indeproipDB.dbhost,indeproipDB.dbuser,indeproipDB.dbpassword,indeproipDB.dbname)
 sql_ingresos = "SELECT cwmovim.DgaCod as 'dgacod', cwcpbte.CpbMes as 'mes', cwcpbte.CpbAno as 'ano', cwcpbte.CpbNum as 'cpbnum', cwcpbte.CpbTip as 'cpbtip', cwcpbte.CpbNui as 'cpbnui', cwmovim.PctCod as 'pctcod', cwmovim.MovGlosa as 'glosa', -cwmovim.MovDebe+cwmovim.MovHaber AS 'SALDO', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descipcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg WHERE cwmovim.CpbAno = cwcpbte.CpbAno AND cwmovim.CpbNum = cwcpbte.CpbNum AND cwmovim.AreaCod = cwcpbte.AreaCod AND cwmovim.CcCod = cwtccos.CodiCC AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.PctCod like '4%' AND (cwcpbte.CpbEst='V') and cwmovim.CcCod = '03-50'"
 sql_rem = "SELECT cwmovim.DgaCod as 'dgacod', cwcpbte.CpbMes as 'mes', cwcpbte.CpbAno as 'ano', cwcpbte.CpbNum as 'cpbnum', cwcpbte.CpbTip as 'cpbtip', cwcpbte.CpbNui as 'cpbnui', cwmovim.PctCod as 'pctcod', cwmovim.MovGlosa as 'glosa', cwmovim.MovDebe-cwmovim.MovHaber AS 'SALDO', cwmovim.CcCod as 'cccod', cwtccos.DescCC as 'descripcioncc' FROM softland.cwcpbte, softland.cwmovim, softland.cwtccos, softland.cwtdetg WHERE cwmovim.CpbAno = cwcpbte.CpbAno AND cwmovim.CpbNum = cwcpbte.CpbNum AND cwmovim.AreaCod = cwcpbte.AreaCod AND cwmovim.CcCod = cwtccos.CodiCC AND cwmovim.DgaCod = cwtdetg.CodDet AND cwmovim.DgaCod like '03%' AND (cwcpbte.CpbEst='V') and cwmovim.CcCod = '03-50'"
 sql_ventas = "SELECT iw_gsaen.Tipo, iw_gsaen.Folio, (iw_gsaen.NetoAfecto + iw_gsaen.NetoExento) as Netos, month(iw_gsaen.Fecha) as Mes, year(iw_gsaen.Fecha) as Year, cwtauxi.CodAux, cwtauxi.NomAux FROM softland.iw_gsaen, softland.cwtauxi WHERE cwtauxi.CodAux = iw_gsaen.CodAux AND ((iw_gsaen.Estado='V') AND (iw_gsaen.Tipo='F' Or iw_gsaen.Tipo='N' Or iw_gsaen.Tipo='D'))"
@@ -64,15 +63,12 @@ sql_gastosdetallecodigo = "select cwmovim.CpbMes as 'mes', cwmovim.CpbAno as 'an
 # Find a workbook by name and open the first sheet
 # Make sure you use the right name here.
 
-
 import_sqlserver2gas(mydb,sql_ingresos,ws,"qINGRESOS",10)
 import_sqlserver2gas(mydb,sql_rem,ws,"qREM",11)
-#import_sqlserver2gas(mydb,sql_ventas,ws,"qVENTAS",12)
 import_sqlserver2gas(mydb,sql_gastosdetallecodigo,ws,"qGASTOSdetalleCODIGO",12)
+#import_sqlserver2gas(mydb,sql_ventas,ws,"qVENTAS",12)
 #import_sp2gas(mydb,'sp_cobs_resumen_evolucion',ws,"qEVOLUCION",12)
 #import_mysql2gas(mydb,"select * from view_cobs_detalle_membresias",ws,"qMEMBRESIAS",14)
-
-
 mydb.close()
 
 ## INFO INTERPETROL
