@@ -65,7 +65,7 @@ sql_bills_csb_administracion = "SELECT ai.*,rp.name AS supplier,    rc.name AS c
 import_mysql2gas(mydb,sql_invoices,ws,"qINVOICES",11)
 import_mysql2gas(mydb,sql_bills_residual,ws,"qBILLSRESIDUAL",12)
 import_mysql2gas(mydb,sql_bills,ws,"qBILLS",13)
-import_mysql2gas(mydb,sql_bills_ip_administracion,ws,"qBILLS_IP_ADMINISTRACION",14)
+import_mysql2gas(mydb,sql_bills_ip_administracion,ws,"qBILLS_IP_ADMINISTRACION",19)
 
 mydb.close()
 
