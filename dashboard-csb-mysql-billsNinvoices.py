@@ -31,7 +31,7 @@ def import_mysql2gas(db,sqlstmt,ws,sheetname,rowlog):
 	sh=ws.worksheet(sheetname)
 	sh.clear()
 	set_with_dataframe(sh,sql_data)
-	cursor.close()	
+	cursor.close()
 	#end logging
 	log_end(ws,rowlog)
 
@@ -60,6 +60,7 @@ sql_invoices = "SELECT rp.name AS client,    rc.name AS vessel,ai.name AS codigo
 sql_bills_residual = "select ai.*,rp.name as supplier, rc.name as company from account_invoice ai join res_partner rp on ai.partner_id = rp.id join res_company rc on ai.company_id = rc.id where ai.type ='in_invoice'  and residual_company_signed <>0 order by ai.date desc,ai.partner_id desc,ai.name desc"
 sql_bills = "select ai.*,rp.name as supplier, rc.name as company from account_invoice ai join res_partner rp on ai.partner_id = rp.id join res_company rc on ai.company_id = rc.id where ai.type ='in_invoice' order by ai.date desc,ai.partner_id desc,ai.name desc"
 sql_bills_ip_administracion = "SELECT ai.*,rp.name AS supplier,    rc.name AS company FROM account_invoice ai JOIN res_partner rp  ON ai.partner_id = rp.id JOIN res_company rc  ON ai.company_id = rc.id WHERE ai.type ='in_invoice'  AND ai.partner_id = 154 and ai.state <> 'cancel' ORDER BY ai.date desc,ai.partner_id desc,ai.name desc"
+sql_bills_csb_administracion = "SELECT ai.*,rp.name AS supplier,    rc.name AS company FROM account_invoice ai JOIN res_partner rp  ON ai.partner_id = rp.id JOIN res_company rc  ON ai.company_id = rc.id WHERE ai.type ='in_invoice'  AND ai.partner_id = 245 and ai.state <> 'cancel' ORDER BY ai.date desc,ai.partner_id desc,ai.name desc"
 
 import_mysql2gas(mydb,sql_invoices,ws,"qINVOICES",11)
 import_mysql2gas(mydb,sql_bills_residual,ws,"qBILLSRESIDUAL",12)
