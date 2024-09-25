@@ -82,13 +82,13 @@ sql_cetra_icetra = "SELECT cwcpbte.CpbAno, cwmovim.CodAux, cwmovim.PctCod, cwmov
 # Find a workbook by name and open the first sheet
 # Make sure you use the right name here.
 ws = client.open_by_key(file_id)
-import_sqlserver2gas(mydb,sql_cetra_conacsa,ws,"qCetra-Carsi",2)
+import_sqlserver2gas(mydb,sql_cetra_carsi,ws,"qCetra-Carsi",2)
 import_sqlserver2gas(mydb,sql_cetra_conacsa,ws,"qCetra-Conacsa",3)
-import_sqlserver2gas(mydb,sql_cetra_conacsa,ws,"qCetra-Cmi",4)
-import_sqlserver2gas(mydb,sql_cetra_conacsa,ws,"qCetra-Innovaplast",5)
-import_sqlserver2gas(mydb,sql_cetra_conacsa,ws,"qCetra-Interpetrol",6)
-import_sqlserver2gas(mydb,sql_cetra_conacsa,ws,"qCetra-IPacifico",7)
-import_sqlserver2gas(mydb,sql_cetra_conacsa,ws,"qCetra-ICetra",8)
+import_sqlserver2gas(mydb,sql_cetra_cmi,ws,"qCetra-Cmi",4)
+import_sqlserver2gas(mydb,sql_cetra_innovaplast,ws,"qCetra-Innovaplast",5)
+import_sqlserver2gas(mydb,sql_cetra_interpetrol,ws,"qCetra-Interpetrol",6)
+import_sqlserver2gas(mydb,sql_cetra_ipacifico,ws,"qCetra-IPacifico",7)
+import_sqlserver2gas(mydb,sql_cetra_icetra,ws,"qCetra-ICetra",8)
 #import_sqlserver2gas(mydb,sql_ip_csb,ws,"qInterpetrol-CSB",9)
 #import_sqlserver2gas(mydb,sql_gastosdetalle,ws,"qGASTOSDETALLE",11)
 
