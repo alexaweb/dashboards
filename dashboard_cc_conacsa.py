@@ -77,7 +77,7 @@ sql_conacsa_cetra = "SELECT cwcpbte.CpbAno, cwmovim.CodAux, cwmovim.PctCod, cwmo
 # Make sure you use the right name here.
 ws = client.open_by_key(file_id)
 
-import_sqlserver2gas(mydb,sql_ip_ipmt,ws,"qConacsa-Cetra",12)
+import_sqlserver2gas(mydb,sql_conacsa_cetra,ws,"qConacsa-Cetra",12)
 #import_sqlserver2gas(mydb,sql_ip_csb,ws,"qInterpetrol-CSB",9)
 #import_sqlserver2gas(mydb,sql_gastosdetalle,ws,"qGASTOSDETALLE",11)
 
